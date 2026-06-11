@@ -105,15 +105,15 @@ const App = {
                 <h1>Хроники Нама-хатты</h1>
                 <p class="subtitle">Цифровая капсула времени. Летопись наших встреч, связывающих поколения.</p>
                 <div class="stats-container reveal">
-                    <div class="stat-box">
+                    <div class="stat-box" onclick="document.querySelector('.timeline').scrollIntoView({behavior: 'smooth'})" title="Перейти к списку встреч">
                         <span class="stat-number">${stats.events}</span>
                         <span class="stat-label">Встреч</span>
                     </div>
-                    <div class="stat-box">
+                    <div class="stat-box" onclick="document.getElementById('searchInput').focus(); document.querySelector('.timeline').scrollIntoView({behavior: 'smooth'})" title="Начать поиск по темам">
                         <span class="stat-number">${stats.topics}</span>
                         <span class="stat-label">Тем</span>
                     </div>
-                    <div class="stat-box">
+                    <div class="stat-box" onclick="window.location.hash='#gallery'" title="Открыть медиа-галерею">
                         <span class="stat-number">${stats.photos}</span>
                         <span class="stat-label">Фото</span>
                     </div>

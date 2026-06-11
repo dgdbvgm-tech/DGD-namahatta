@@ -389,6 +389,7 @@ h1, h2, h3 {
     min-width: 150px;
     box-shadow: 0 5px 15px var(--shadow-color);
     transition: transform 0.3s ease;
+    cursor: pointer;
 }
 
 .stat-box:hover {
