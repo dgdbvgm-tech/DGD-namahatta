@@ -695,3 +695,56 @@ h1, h2, h3 {
         padding: 2rem 1.5rem;
     }
 }
+
+/* --- Upcoming Events Styles --- */
+
+.section-title {
+    font-size: 2rem;
+    color: var(--primary-gold);
+    margin: 2rem 0 1.5rem 0;
+    text-align: center;
+    position: relative;
+}
+
+.section-title::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 3px;
+    background: var(--primary-gold);
+    margin: 0.5rem auto 0 auto;
+    border-radius: 3px;
+}
+
+.upcoming-item {
+    border: 1px solid var(--primary-gold);
+    background: linear-gradient(135deg, var(--card-bg) 0%, rgba(212, 175, 55, 0.05) 100%);
+    position: relative;
+    box-shadow: 0 10px 30px rgba(212, 175, 55, 0.1);
+}
+
+.upcoming-item:hover {
+    box-shadow: 0 15px 40px rgba(212, 175, 55, 0.2);
+}
+
+.upcoming-badge {
+    position: absolute;
+    top: -12px;
+    right: 20px;
+    background: var(--primary-gold);
+    color: #fff;
+    padding: 0.3rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}

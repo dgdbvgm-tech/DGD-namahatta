@@ -175,16 +175,39 @@ const App = {
             return;
         }
 
+        const today = new Date().toISOString().split('T')[0];
+        const upcomingEvents = sortedEvents.filter(e => e.id >= today).sort((a, b) => a.id.localeCompare(b.id)); // sort ascending for upcoming
+        const pastEvents = sortedEvents.filter(e => e.id < today);
+
         let html = '';
-        sortedEvents.forEach(event => {
-            html += `
-                <div class="timeline-item reveal" style="margin-bottom: 2rem;" onclick="window.location.hash='#event/${event.id}'">
-                    <div class="timeline-date">${event.date} • ${event.location}</div>
-                    <h2 class="timeline-title">${event.title}</h2>
-                    <p class="timeline-desc">${event.subtitle}</p>
-                </div>
-            `;
-        });
+
+        if (upcomingEvents.length > 0) {
+            html += '<h2 class="section-title reveal">Предстоящие встречи (Анонсы)</h2>';
+            upcomingEvents.forEach(event => {
+                html += `
+                    <div class="timeline-item upcoming-item reveal" style="margin-bottom: 3rem;" onclick="window.location.hash='#event/${event.id}'">
+                        <div class="upcoming-badge">Скоро</div>
+                        <div class="timeline-date">${event.date} • ${event.location}</div>
+                        <h2 class="timeline-title">${event.title}</h2>
+                        <p class="timeline-desc">${event.subtitle}</p>
+                    </div>
+                `;
+            });
+        }
+
+        if (pastEvents.length > 0) {
+            html += '<h2 class="section-title reveal">Летопись Нама-хатт</h2>';
+            pastEvents.forEach(event => {
+                html += `
+                    <div class="timeline-item reveal" style="margin-bottom: 2rem;" onclick="window.location.hash='#event/${event.id}'">
+                        <div class="timeline-date">${event.date} • ${event.location}</div>
+                        <h2 class="timeline-title">${event.title}</h2>
+                        <p class="timeline-desc">${event.subtitle}</p>
+                    </div>
+                `;
+            });
+        }
+
         listContainer.innerHTML = html;
     },
 
