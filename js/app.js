@@ -16,6 +16,7 @@ const App = {
         }
 
         this.initRouter();
+        this.initSevaModal();
     },
 
     initTheme() {
@@ -343,6 +344,51 @@ const App = {
         reveals.forEach(reveal => {
             revealOnScroll.observe(reveal);
         });
+    },
+
+    initSevaModal() {
+        const openBtn = document.getElementById('open-seva');
+        const closeBtn = document.getElementById('close-seva');
+        const modal = document.getElementById('seva-modal');
+        const copyBtn = document.getElementById('copy-kaspi');
+        const toast = document.getElementById('toast');
+
+        if (!openBtn || !modal) return;
+
+        // Open modal
+        openBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            modal.classList.add('active');
+        });
+
+        // Close modal
+        closeBtn.addEventListener('click', () => {
+            modal.classList.remove('active');
+        });
+
+        // Close on outside click
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('active');
+            }
+        });
+
+        // Copy Kaspi
+        if (copyBtn) {
+            copyBtn.addEventListener('click', async () => {
+                const phone = copyBtn.getAttribute('data-phone');
+                try {
+                    await navigator.clipboard.writeText(phone);
+                    // Show toast
+                    toast.classList.add('show');
+                    setTimeout(() => {
+                        toast.classList.remove('show');
+                    }, 3000);
+                } catch (err) {
+                    console.error('Failed to copy: ', err);
+                }
+            });
+        }
     }
 };
 

@@ -26,6 +26,7 @@
         <div class="nav-links">
             <a href="#timeline" class="nav-link">Лента времени</a>
             <a href="#gallery" class="nav-link">Галерея</a>
+            <button class="nav-link seva-btn" id="open-seva" style="background: none; border: none; font-family: inherit; font-size: 0.95rem; cursor: pointer; color: var(--primary-gold); font-weight: 600;">❤️ Сева</button>
             <button class="theme-toggle" id="theme-toggle" aria-label="Переключить тему">🌙</button>
         </div>
     </nav>
@@ -34,6 +35,42 @@
         <!-- Content will be dynamically loaded here by app.js -->
         <div class="loader">Инициализация капсулы времени...</div>
     </main>
+
+    <!-- Seva Modal -->
+    <div class="modal-overlay" id="seva-modal">
+        <div class="modal-content">
+            <button class="close-modal" id="close-seva">&times;</button>
+            <h2 class="modal-title">Возможности для Служения (Сева)</h2>
+            <p class="modal-subtitle">Нама-хатта — это наш общий дом. Любой ваш вклад, будь то физическая помощь или пожертвование, делает этот праздник возможным и привлекает безграничную милость.</p>
+            
+            <div class="seva-grid">
+                <div class="seva-card">
+                    <h3>🙏 Практическая сева</h3>
+                    <p>Приглашаем вас поучаствовать физически и вложить свою энергию в подготовку:</p>
+                    <ul class="seva-list">
+                        <li>🔪 Помощь в нарезке и приготовлении прасада</li>
+                        <li>🧹 Подготовка помещения до программы</li>
+                        <li>💧 Мытье посуды и уборка после</li>
+                    </ul>
+                </div>
+
+                <div class="seva-card">
+                    <h3>💎 Финансовая ягья</h3>
+                    <p>Посильное пожертвование на общую программу (закупка продуктов, аренда и т.д.):</p>
+                    <div class="kaspi-block">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/e/e1/Kaspi_kz_Logo.png" alt="Kaspi.kz" class="kaspi-logo" style="height: 24px; margin-bottom: 10px;">
+                        <p class="kaspi-name">Самат К.</p>
+                        <button class="copy-btn" id="copy-kaspi" data-phone="+77078619204">
+                            +7 707 861 9204 📋
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">Номер скопирован! ✨</div>
 
     <script src="js/app.js"></script>
 </body>
