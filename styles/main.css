@@ -748,3 +748,25 @@ h1, h2, h3 {
     50% { transform: scale(1.05); }
     100% { transform: scale(1); }
 }
+
+/* --- Article Button Styles --- */
+.article-btn {
+    display: inline-block;
+    margin-top: 1rem;
+    padding: 0.6rem 1.2rem;
+    background: rgba(212, 175, 55, 0.1);
+    color: var(--primary-gold);
+    border: 1px solid var(--primary-gold);
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.article-btn:hover {
+    background: var(--primary-gold);
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(212, 175, 55, 0.2);
+}

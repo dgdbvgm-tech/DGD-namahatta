@@ -323,6 +323,7 @@ const App = {
                     <div class="topic-item">
                         <h3>${topic.title}</h3>
                         <p>${topic.description}</p>
+                        ${topic.articleUrl ? `<a href="${topic.articleUrl}" class="article-btn">${topic.articleButtonText || 'Читать статью'} &rarr;</a>` : ''}
                     </div>
                 `;
             });
