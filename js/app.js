@@ -7,10 +7,20 @@ const App = {
         this.initTheme();
         
         try {
-            const response = await fetch('data/events.json');
-            this.data = await response.json();
+            const [eventsRes, ideasRes] = await Promise.all([
+                fetch('data/events.json'),
+                fetch('data/ideas.json')
+            ]);
+            this.data = await eventsRes.json();
+            this.ideasData = await ideasRes.json();
+            
+            // Update nav link badge
+            const ideasNav = document.getElementById('nav-ideas-link');
+            if (ideasNav && this.ideasData) {
+                ideasNav.innerHTML = `💡 Банк идей <span class="badge">${this.ideasData.length}</span>`;
+            }
         } catch (e) {
-            console.error("Failed to load events data", e);
+            console.error("Failed to load data", e);
             this.container.innerHTML = '<div class="loader">Ошибка загрузки данных.</div>';
             return;
         }
@@ -112,9 +122,9 @@ const App = {
                         <span class="stat-number">${stats.events}</span>
                         <span class="stat-label">Встреч</span>
                     </div>
-                    <div class="stat-box" onclick="document.getElementById('searchInput').focus(); document.querySelector('.timeline').scrollIntoView({behavior: 'smooth'})" title="Начать поиск по темам">
-                        <span class="stat-number">${stats.topics}</span>
-                        <span class="stat-label">Тем</span>
+                    <div class="stat-box" onclick="window.location.hash='#ideas'" title="Перейти в банк идей">
+                        <span class="stat-number">${this.ideasData ? this.ideasData.length : 0}</span>
+                        <span class="stat-label">Идей</span>
                     </div>
                     <div class="stat-box" onclick="window.location.hash='#gallery'" title="Открыть медиа-галерею">
                         <span class="stat-number">${stats.photos}</span>
@@ -315,12 +325,33 @@ const App = {
         }
 
         // 3. Topics Section
-        if (event.topics && event.topics.length > 0) {
+        if ((event.topics && event.topics.length > 0) || event.dynamicTopIdea) {
             html += `
                 <section class="card reveal">
                     <h2>Философские Узлы (Темы беседы)</h2>
             `;
-            event.topics.forEach(topic => {
+            
+            let topicsToRender = event.topics || [];
+            
+            // Fetch top idea if dynamicTopIdea is true
+            if (event.dynamicTopIdea && this.ideasData && this.ideasData.length > 0) {
+                // Sort by votes
+                const sortedIdeas = [...this.ideasData].sort((a, b) => {
+                    const aVotes = a.votes + (localStorage.getItem('voted_idea_' + a.id) === 'true' ? 1 : 0);
+                    const bVotes = b.votes + (localStorage.getItem('voted_idea_' + b.id) === 'true' ? 1 : 0);
+                    return bVotes - aVotes;
+                });
+                const topIdea = sortedIdeas[0];
+                
+                topicsToRender = [{
+                    title: `🌟 ${topIdea.title} (Выбор участников)`,
+                    description: topIdea.description,
+                    articleUrl: topIdea.url || null,
+                    articleButtonText: "Перейти к лонгриду"
+                }];
+            }
+            
+            topicsToRender.forEach(topic => {
                 html += `
                     <div class="topic-item">
                         <h3>${topic.title}</h3>
@@ -448,8 +479,10 @@ const App = {
                 
                 let imageHtml = '';
                 if (idea.image) {
+                    const imgTag = `<img src="${idea.image}" alt="Preview" style="width: 100%; height: 100%; object-fit: cover; object-position: center; transition: transform 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">`;
+                    const innerHtml = idea.url ? `<a href="${idea.url}" target="_blank" rel="noopener noreferrer" style="display: block; width: 100%; height: 100%;">${imgTag}</a>` : imgTag;
                     imageHtml = `<div style="height: 160px; overflow: hidden; border-radius: 8px 8px 0 0; margin: -1.5rem -1.5rem 1rem -1.5rem;">
-                                    <img src="${idea.image}" alt="Preview" style="width: 100%; height: 100%; object-fit: cover; object-position: center;">
+                                    ${innerHtml}
                                  </div>`;
                 }
 

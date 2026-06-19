@@ -239,21 +239,37 @@
         }
 
         .back-btn {
-            display: inline-block;
-            margin-bottom: 2rem;
+            position: fixed;
+            top: 1.5rem;
+            left: 1.5rem;
+            z-index: 50;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            padding: 0.625rem 1.25rem;
+            border-radius: 9999px;
             text-decoration: none;
-            color: var(--funny-text);
-            font-weight: 600;
-            font-family: 'Outfit', sans-serif;
-            padding: 10px 20px;
-            background: rgba(255,255,255,0.5);
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
-            transition: all 0.3s;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.875rem;
+            font-weight: 500;
+            letter-spacing: 0.025em;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
         }
+
         .back-btn:hover {
-            background: rgba(255,255,255,0.8);
-            transform: translateX(-5px);
+            background: rgba(15, 23, 42, 0.8);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .back-btn svg {
+            width: 1rem;
+            height: 1rem;
         }
         .serious-zone .back-btn {
             color: var(--serious-text);
@@ -281,7 +297,10 @@
     <div class="emoji-bg e3">📱</div>
 
     <section class="hero reveal">
-        <a href="index.html" class="back-btn">&larr; На главную</a>
+        <a href="index.html#ideas" class="back-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+            Вернуться в Банк идей
+        </a>
         <h1>ОТ CHICKEN BANANA<br>К ХАРЕ КРИШНА</h1>
         <p style="font-size: 1.5rem; font-weight: 500; margin-bottom: 3rem; color: #4B5563;">Чем мы наполняем умы наших детей?</p>
         <img src="images/hero-chicken-banana-meditation-hook.webp" alt="Медитация и цифровой шум" class="hero-img">
