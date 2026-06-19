@@ -12,7 +12,6 @@
     <meta property="og:url" content="https://dgd-namahatta.netlify.app/harinama-sankirtana.html">
     <meta property="og:title" content="Совместное воспевание Святых Имен (Муж и Жена)">
     <meta property="og:description" content="Самый действенный метод в этот век. Как вдохновить друг друга на ежедневный совместный киртан мужа и жены.">
-    <!-- Placeholder image -->
     <meta property="og:image" content="images/harinama-hero.jpg">
 
     <!-- Twitter -->
@@ -22,178 +21,360 @@
     <meta name="twitter:description" content="Самый действенный метод в этот век. Как вдохновить друг друга на ежедневный совместный киртан мужа и жены.">
     <meta name="twitter:image" content="images/harinama-hero.jpg">
 
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Cinzel', 'serif'],
+                    },
+                    colors: {
+                        krishna: {
+                            900: '#0a0f25',
+                            800: '#141c42',
+                            700: '#1e2b6b',
+                        },
+                        saffron: {
+                            500: '#FF9933',
+                            400: '#ffb066',
+                        }
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'float-slow': 'float 10s ease-in-out infinite',
+                        'glow': 'glow 3s ease-in-out infinite alternate',
+                        'spin-slow': 'spin 15s linear infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        },
+                        glow: {
+                            '0%': { textShadow: '0 0 10px rgba(255, 153, 51, 0.5)' },
+                            '100%': { textShadow: '0 0 30px rgba(255, 153, 51, 1), 0 0 50px rgba(255, 153, 51, 0.8)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        /* Reveal Animations */
+        .reveal {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 1s cubic-bezier(0.5, 0, 0, 1);
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .reveal-delay-1 { transition-delay: 200ms; }
+        .reveal-delay-2 { transition-delay: 400ms; }
+        
+        /* Particle Effects */
+        .particle {
+            position: absolute;
+            background: radial-gradient(circle, rgba(255,200,100,0.8) 0%, rgba(255,200,100,0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+        
+        .glass-panel {
+            background: rgba(20, 28, 66, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 153, 51, 0.2);
+        }
+        
+        .gold-text-gradient {
+            background: linear-gradient(to right, #FFDF00, #D4AF37, #FFDF00);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+    </style>
 </head>
-<body class="min-h-screen bg-slate-50 text-slate-800 font-sans selection:bg-amber-200">
+<body class="min-h-screen bg-krishna-900 text-slate-200 font-sans selection:bg-saffron-500 selection:text-white overflow-x-hidden">
+
+    <!-- Particles Container -->
+    <div id="particles-container" class="fixed inset-0 z-0 pointer-events-none overflow-hidden"></div>
 
     <!-- Навигация назад -->
-    <a href="index.html#ideas" class="fixed top-6 left-6 z-50 bg-slate-900/60 backdrop-blur-md border border-white/20 text-white px-5 py-2.5 rounded-full hover:bg-slate-900/80 transition-all flex items-center gap-2 shadow-lg hover:shadow-xl text-sm font-medium tracking-wide">
-        <i data-lucide="arrow-left" class="w-4 h-4"></i> Вернуться в Банк идей
+    <a href="index.html#ideas" class="fixed top-6 left-6 z-50 glass-panel text-saffron-400 px-5 py-2.5 rounded-full hover:bg-white/10 transition-all flex items-center gap-2 shadow-lg hover:shadow-[0_0_15px_rgba(255,153,51,0.5)] text-sm font-medium tracking-wide border border-saffron-500/30">
+        <i data-lucide="arrow-left" class="w-4 h-4"></i> В Банк идей
     </a>
 
     <!-- 1. HERO SECTION -->
-    <section class="relative min-h-screen flex items-center justify-center overflow-hidden bg-slate-900 text-white">
+    <section class="relative min-h-screen flex items-center justify-center overflow-hidden border-b border-saffron-500/20">
         <!-- Parallax Background -->
         <div id="hero-bg" 
-             class="absolute inset-0 z-0 opacity-40 bg-cover bg-center"
-             style="background-image: url('images/harinama-hero.jpg'); transform: translateY(0px);">
+             class="absolute inset-0 z-0 opacity-50 bg-cover bg-center transition-transform duration-100 ease-out"
+             style="background-image: url('images/harinama-hero.jpg');">
         </div>
         
-        <div class="absolute inset-0 bg-gradient-to-b from-slate-900/50 via-slate-900/80 to-slate-900 z-10"></div>
+        <div class="absolute inset-0 bg-gradient-to-b from-krishna-900/60 via-krishna-800/70 to-krishna-900 z-10"></div>
         
-        <div class="relative z-20 max-w-4xl mx-auto px-6 text-center mt-20">
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-600/20 text-amber-400 border border-amber-500/30 mb-8 uppercase tracking-widest text-xs font-bold">
+        <!-- Animated Mandala/Circle background hint -->
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full border border-saffron-500/10 animate-spin-slow z-10 pointer-events-none"></div>
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full border border-sky-400/10 animate-spin-slow direction-reverse z-10 pointer-events-none" style="animation-direction: reverse;"></div>
+
+        <div class="relative z-20 max-w-4xl mx-auto px-6 text-center mt-20 reveal active">
+            <div class="inline-flex items-center gap-2 px-5 py-2 rounded-full glass-panel text-saffron-400 mb-8 uppercase tracking-[0.2em] text-xs font-bold shadow-[0_0_20px_rgba(255,153,51,0.2)]">
                 <i data-lucide="music" class="w-4 h-4"></i> Идея для обсуждения
             </div>
-            <h1 class="text-4xl md:text-6xl font-black mb-6 leading-tight tracking-tight uppercase">
-                <span class="block text-amber-500 [-webkit-text-stroke:1px_black]">СОВМЕСТНОЕ</span>
-                <span class="block text-sky-400 [-webkit-text-stroke:1px_black]">ВОСПЕВАНИЕ</span>
-                <span class="block text-white [-webkit-text-stroke:1px_black]">СВЯТЫХ ИМЕН</span>
+            
+            <h1 class="font-serif text-5xl md:text-7xl font-bold mb-6 leading-tight tracking-wide uppercase">
+                <span class="block gold-text-gradient animate-glow mb-2">СОВМЕСТНОЕ</span>
+                <span class="block text-sky-300 drop-shadow-[0_0_15px_rgba(125,211,252,0.6)]">ВОСПЕВАНИЕ</span>
+                <span class="block text-white drop-shadow-lg">СВЯТЫХ ИМЕН</span>
             </h1>
-            <p class="text-xl md:text-2xl text-slate-300 font-light mb-8 max-w-2xl mx-auto">
+            
+            <p class="text-xl md:text-2xl text-slate-300 font-light mb-12 max-w-2xl mx-auto leading-relaxed">
                 Как вдохновить друг друга на ежедневный киртан в семье, несмотря на быт и усталость.
             </p>
-            <div class="mb-12 flex items-center justify-center gap-3 text-sm font-medium text-slate-400 tracking-wider uppercase">
-                <i data-lucide="user" class="w-4 h-4 opacity-70"></i>
-                <span>Идея от: Джаганнатх прасад</span>
+            
+            <div class="flex items-center justify-center gap-3 text-sm font-medium text-saffron-500/70 tracking-[0.15em] uppercase">
+                <i data-lucide="user" class="w-4 h-4"></i>
+                <span>От: Джаганнатх прасад</span>
             </div>
-            <i data-lucide="arrow-down-circle" class="mx-auto animate-bounce text-slate-500 w-10 h-10"></i>
+            
+            <div class="mt-16 animate-bounce text-saffron-500/50">
+                <i data-lucide="chevrons-down" class="mx-auto w-10 h-10"></i>
+            </div>
         </div>
     </section>
 
     <!-- 2. THE PROBLEM (Контекст) -->
-    <section class="py-24 px-6 bg-white">
-        <div class="max-w-3xl mx-auto">
-            <h2 class="text-3xl md:text-4xl font-bold mb-8 text-center text-slate-800">Отрывок из размышлений</h2>
-            <div class="text-lg leading-relaxed text-slate-600 space-y-6">
-                <p>
-                    «Смотрите, есть духовная практика, есть материальные обязанности. Преданные не часто встречаются друг с другом в суете мегаполиса, поэтому, когда мы вместе, лучше обсуждать духовные темы, а не предаваться праджалпе.»
-                </p>
-                <p>
-                    «Когда мы приходим на воскресную программу, нам легко петь киртан: "О, праздник, Харибол, куча преданных". Но дома всё иначе. Бывший брахмачари в ашраме встает вместе со всеми на мангала-арати и бегает, а дома в отпуске спит до обеда, потому что уже приходится ехать только на своей личной <em>шакти</em>.»
-                </p>
-                <p class="font-semibold text-amber-600">
-                    Первая фундаментальная идея для обсуждения на нама-хаттах — это совместное воспевание святых имен именно мужа с женой.
-                </p>
+    <section class="py-32 px-6 relative z-10">
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-krishna-800 to-krishna-900 -z-10"></div>
+        <div class="max-w-4xl mx-auto reveal">
+            <div class="flex flex-col items-center mb-16">
+                <i data-lucide="quote" class="w-12 h-12 text-saffron-500/40 mb-4"></i>
+                <h2 class="font-serif text-3xl md:text-5xl font-bold text-center gold-text-gradient">Отрывок из размышлений</h2>
             </div>
-        </div>
-    </section>
-
-    <!-- 3. SHASTRIC EVIDENCE (Научное подтверждение) -->
-    <section class="py-24 px-6 bg-slate-100 border-y border-slate-200">
-        <div class="max-w-5xl mx-auto">
-            <div class="text-center mb-16">
-                <i data-lucide="book-open" class="mx-auto w-12 h-12 text-slate-400 mb-4"></i>
-                <h2 class="text-3xl md:text-4xl font-bold">Что говорят об этом Шастры?</h2>
-                <p class="text-slate-500 mt-4">Фундамент этой идеи заложен в ключевых наставлениях ачарьев.</p>
-            </div>
-
-            <div class="grid md:grid-cols-2 gap-8">
-                <!-- Цитата 1 -->
-                <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 relative overflow-hidden group hover:shadow-md transition-shadow">
-                    <div class="absolute top-0 right-0 w-24 h-24 bg-sky-100 rounded-bl-full -z-0 opacity-50"></div>
-                    <div class="relative z-10">
-                        <h3 class="text-sm font-bold text-sky-600 tracking-wider uppercase mb-4">Девять процессов Бхакти</h3>
-                        <blockquote class="text-lg font-serif text-slate-800 mb-6 italic">
-                            «Слушать трансцендентное святое имя Господа и описания Его облика... рассказывать и помнить о них, служить Господу... поклоняться Божеству, возносить молитвы... Тот, кто непосредственно служит Кришне, применяя эти девять методов, уже достиг высшей цели жизни.»
-                        </blockquote>
-                        <p class="text-sm font-semibold text-slate-500"><a href="https://vedabase.io/ru/library/sb/7/5/23-24/" target="_blank" rel="noreferrer" class="hover:text-sky-500 underline">— Шримад-Бхагаватам 7.5.23-24</a></p>
-                    </div>
-                </div>
-
-                <!-- Цитата 2 -->
-                <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 relative overflow-hidden group hover:shadow-md transition-shadow">
-                    <div class="absolute top-0 right-0 w-24 h-24 bg-amber-100 rounded-bl-full -z-0 opacity-50"></div>
-                    <div class="relative z-10">
-                        <h3 class="text-sm font-bold text-amber-600 tracking-wider uppercase mb-4">Юга-Дхарма</h3>
-                        <blockquote class="text-lg font-serif text-slate-800 mb-6 italic">
-                            «В век Кали разумные люди, собираясь вместе, славят Господа и поклоняются Его воплощению, непрестанно поющему имена Кришны. Хотя цвет Его тела не темный, это Сам Кришна. С Ним всегда Его личные спутники, слуги, оружие и ближайшие помощники.»
-                        </blockquote>
-                        <p class="text-sm font-semibold text-slate-500"><a href="https://vedabase.io/ru/library/sb/11/5/32/" target="_blank" rel="noreferrer" class="hover:text-amber-500 underline">— Шримад-Бхагаватам 11.5.32</a></p>
-                    </div>
-                </div>
-
-                <!-- Картинка между цитатами -->
-                <div class="md:col-span-2 rounded-2xl overflow-hidden h-64 md:h-96 relative my-4 shadow-inner">
-                    <img src="images/harinama-quote.jpg" alt="Spiritual journey" class="absolute inset-0 w-full h-full object-cover object-center filter grayscale contrast-125" />
-                    <div class="absolute inset-0 bg-slate-900/40 mix-blend-multiply"></div>
-                    <div class="absolute bottom-6 left-6 right-6">
-                        <p class="text-white text-lg font-medium text-center shadow-sm">"У каждого человека в мире есть 15 минут на то, чтобы вместе сесть попеть киртан. У каждого абсолютно. Иначе бы Чайтанья Махапрабху не дал нам этот метод."</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- 4. GURU'S GUIDANCE (Практика) -->
-    <section class="py-24 px-6 bg-amber-50 relative overflow-hidden">
-        <div class="relative z-10 max-w-4xl mx-auto">
-            <i data-lucide="flame" class="w-16 h-16 text-amber-400 mb-6 mx-auto block text-center"></i>
-            <h2 class="text-3xl font-bold mb-6 text-slate-800 text-center">Всего 15 минут в день</h2>
             
-            <div class="bg-white p-8 md:p-10 rounded-3xl shadow-lg border border-amber-100">
-                <div class="space-y-6 text-slate-700 text-lg leading-relaxed font-serif">
-                    <p>
+            <div class="space-y-8">
+                <div class="glass-panel p-8 md:p-10 rounded-2xl relative overflow-hidden group hover:bg-white/[0.08] transition-colors reveal reveal-delay-1">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-saffron-500 shadow-[0_0_10px_rgba(255,153,51,0.8)]"></div>
+                    <p class="text-lg md:text-xl leading-relaxed text-slate-300 font-light">
+                        «Смотрите, есть духовная практика, есть материальные обязанности. Преданные не часто встречаются друг с другом в суете мегаполиса, поэтому, когда мы вместе, лучше обсуждать духовные темы, а не предаваться праджалпе.»
+                    </p>
+                </div>
+
+                <div class="glass-panel p-8 md:p-10 rounded-2xl relative overflow-hidden group hover:bg-white/[0.08] transition-colors reveal reveal-delay-2">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-sky-500 shadow-[0_0_10px_rgba(14,165,233,0.8)]"></div>
+                    <p class="text-lg md:text-xl leading-relaxed text-slate-300 font-light">
+                        «Когда мы приходим на воскресную программу, нам легко петь киртан: "О, праздник, Харибол, куча преданных". Но дома всё иначе. Бывший брахмачари в ашраме встает вместе со всеми на мангала-арати и бегает, а дома в отпуске спит до обеда, потому что уже приходится ехать только на своей личной <em class="text-sky-300 not-italic">шакти</em>.»
+                    </p>
+                </div>
+                
+                <div class="p-8 text-center reveal reveal-delay-2">
+                    <p class="font-serif text-2xl md:text-3xl text-saffron-400 drop-shadow-[0_0_10px_rgba(255,153,51,0.4)] leading-relaxed">
+                        Первая фундаментальная идея для обсуждения на нама-хаттах — это совместное воспевание святых имен именно мужа с женой.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. SHASTRIC EVIDENCE -->
+    <section class="py-32 px-6 relative bg-krishna-900 border-y border-saffron-500/20">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-20 reveal">
+                <i data-lucide="scroll-text" class="mx-auto w-12 h-12 text-saffron-500 mb-6 drop-shadow-[0_0_15px_rgba(255,153,51,0.8)]"></i>
+                <h2 class="font-serif text-4xl md:text-5xl font-bold gold-text-gradient mb-6">Что говорят Шастры?</h2>
+                <p class="text-slate-400 text-lg tracking-wide">Фундамент этой идеи заложен в ключевых наставлениях ачарьев.</p>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-10">
+                <!-- Quote 1 -->
+                <div class="glass-panel p-10 rounded-3xl relative overflow-hidden reveal">
+                    <div class="absolute -top-20 -right-20 w-64 h-64 bg-sky-500/10 rounded-full blur-3xl"></div>
+                    <h3 class="font-serif text-lg font-bold text-sky-400 tracking-[0.2em] uppercase mb-6 flex items-center gap-3">
+                        <i data-lucide="flower-2" class="w-5 h-5"></i> Девять процессов Бхакти
+                    </h3>
+                    <blockquote class="text-xl font-serif text-slate-200 mb-8 leading-relaxed italic drop-shadow-md">
+                        «Слушать трансцендентное святое имя Господа и описания Его облика... рассказывать и помнить о них, служить Господу... поклоняться Божеству, возносить молитвы... Тот, кто непосредственно служит Кришне, применяя эти девять методов, уже достиг высшей цели жизни.»
+                    </blockquote>
+                    <a href="https://vedabase.io/ru/library/sb/7/5/23-24/" target="_blank" rel="noreferrer" class="inline-flex items-center gap-2 text-sm font-semibold text-sky-400 hover:text-sky-300 transition-colors uppercase tracking-wider">
+                        Шримад-Бхагаватам 7.5.23-24 <i data-lucide="external-link" class="w-4 h-4"></i>
+                    </a>
+                </div>
+
+                <!-- Quote 2 -->
+                <div class="glass-panel p-10 rounded-3xl relative overflow-hidden reveal reveal-delay-1">
+                    <div class="absolute -top-20 -right-20 w-64 h-64 bg-saffron-500/10 rounded-full blur-3xl"></div>
+                    <h3 class="font-serif text-lg font-bold text-saffron-400 tracking-[0.2em] uppercase mb-6 flex items-center gap-3">
+                        <i data-lucide="sun" class="w-5 h-5"></i> Юга-Дхарма
+                    </h3>
+                    <blockquote class="text-xl font-serif text-slate-200 mb-8 leading-relaxed italic drop-shadow-md">
+                        «В век Кали разумные люди, собираясь вместе, славят Господа и поклоняются Его воплощению, непрестанно поющему имена Кришны. Хотя цвет Его тела не темный, это Сам Кришна. С Ним всегда Его личные спутники, слуги, оружие и ближайшие помощники.»
+                    </blockquote>
+                    <a href="https://vedabase.io/ru/library/sb/11/5/32/" target="_blank" rel="noreferrer" class="inline-flex items-center gap-2 text-sm font-semibold text-saffron-400 hover:text-saffron-300 transition-colors uppercase tracking-wider">
+                        Шримад-Бхагаватам 11.5.32 <i data-lucide="external-link" class="w-4 h-4"></i>
+                    </a>
+                </div>
+
+                <!-- The 15 minutes highlight image -->
+                <div class="lg:col-span-2 mt-10 rounded-3xl overflow-hidden relative shadow-[0_0_40px_rgba(255,153,51,0.15)] group reveal border border-saffron-500/30">
+                    <div class="aspect-video md:aspect-[21/9] relative">
+                        <img src="images/harinama-quote.jpg" alt="15 Minutes Kirtan" class="absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-1000 ease-out" />
+                        <div class="absolute inset-0 bg-gradient-to-t from-krishna-900 via-krishna-900/40 to-transparent"></div>
+                        
+                        <div class="absolute bottom-0 left-0 right-0 p-8 md:p-16 text-center">
+                            <div class="glass-panel inline-block p-6 md:p-8 rounded-2xl border-saffron-500/50 shadow-[0_0_30px_rgba(255,153,51,0.3)] backdrop-blur-xl">
+                                <p class="font-serif text-xl md:text-3xl font-bold gold-text-gradient leading-relaxed">
+                                    "У каждого человека в мире есть 15 минут на то, чтобы вместе сесть попеть киртан. У каждого абсолютно. Иначе бы Чайтанья Махапрабху не дал нам этот метод."
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. GURU'S GUIDANCE -->
+    <section class="py-32 px-6 relative bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-krishna-800 to-krishna-900">
+        <div class="max-w-4xl mx-auto reveal">
+            <div class="flex justify-center mb-10">
+                <div class="w-24 h-24 rounded-full bg-saffron-500/20 flex items-center justify-center border border-saffron-500/40 shadow-[0_0_30px_rgba(255,153,51,0.5)]">
+                    <i data-lucide="flame" class="w-10 h-10 text-saffron-400"></i>
+                </div>
+            </div>
+            <h2 class="font-serif text-4xl md:text-5xl font-bold text-center mb-16 gold-text-gradient">Всего 15 минут в день</h2>
+            
+            <div class="glass-panel p-10 md:p-14 rounded-3xl border-t border-saffron-500/50 shadow-[0_10px_50px_rgba(0,0,0,0.5)]">
+                <div class="space-y-8 text-slate-300 text-lg md:text-xl leading-relaxed font-light">
+                    <p class="reveal">
                         «В книге "Шри Намамрита" собраны все высказывания Шрилы Прабхупады касательно Святого имени. Есть девять видов преданного служения, в каждом можно стать профессионалом и достичь совершенства. Но при этом в этот век самым сильным и действенным методом является именно совместное воспевание святых имен.»
                     </p>
-                    <p>
+                    <p class="reveal">
                         «Не джапа сама по себе, а именно совместное воспевание. Потому что мы удовлетворяем Кришну через Чайтанью Махапрабху.»
                     </p>
-                    <p>
+                    <p class="reveal">
                         «Если мы каждый день кушаем прасад — почему мы это делаем? Потому что это для нас важно. Значит, если воспевание является самым важным процессом, мы должны "принимать" его каждый день. В концепции мужа и жены они как раз-таки могут делать это ежедневно.»
                     </p>
-                    <p class="font-bold text-amber-700 bg-amber-100/50 p-6 rounded-2xl border border-amber-200 mt-8">
-                        «Каждый день мы не можем бегать к преданным петь киртан, если живем в городе. Но вместе сесть и петь киртан дома — 15 минут есть у всех. Несмотря на быт, несмотря на усталость.»
-                    </p>
+                    <div class="mt-12 p-8 rounded-2xl bg-gradient-to-r from-saffron-500/20 to-krishna-800 border border-saffron-500/40 shadow-[0_0_20px_rgba(255,153,51,0.2)] reveal">
+                        <p class="font-serif font-bold text-saffron-400 text-xl md:text-2xl leading-relaxed">
+                            «Каждый день мы не можем бегать к преданным петь киртан, если живем в городе. Но вместе сесть и петь киртан дома — 15 минут есть у всех. Несмотря на быт, несмотря на усталость.»
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- 6. CALL TO ACTION (Встреча) -->
-    <section class="py-20 px-6 bg-gradient-to-br from-amber-500 to-orange-600 text-white text-center">
-        <div class="max-w-4xl mx-auto text-center">
-            <i data-lucide="message-circle" class="w-16 h-16 mx-auto mb-6 opacity-90 block"></i>
-            <h2 class="text-4xl md:text-5xl font-black mb-6 drop-shadow-sm">Голосуйте за эту тему</h2>
-            <p class="text-xl mb-10 opacity-90 max-w-2xl mx-auto">
+    <!-- 5. CALL TO ACTION -->
+    <section class="py-32 px-6 relative overflow-hidden bg-gradient-to-b from-krishna-900 to-[#050813] text-center border-t border-white/5">
+        <div class="max-w-4xl mx-auto relative z-10 reveal">
+            <i data-lucide="sparkles" class="w-16 h-16 mx-auto mb-8 text-saffron-400 animate-pulse"></i>
+            <h2 class="font-serif text-4xl md:text-6xl font-bold mb-8 gold-text-gradient">Голосуйте за эту тему</h2>
+            <p class="text-xl text-slate-400 mb-12 max-w-2xl mx-auto font-light">
                 Если эта тема откликается вам, возвращайтесь в Банк идей и отдайте за неё свой голос. Самые популярные темы мы будем разбирать на будущих встречах.
             </p>
-            <a href="index.html#ideas" class="inline-flex items-center gap-2 bg-white text-amber-600 font-bold px-8 py-4 rounded-full shadow-lg hover:bg-amber-50 transition-colors">
-                <i data-lucide="list" class="w-5 h-5"></i> Открыть Банк идей
+            <a href="index.html#ideas" class="inline-flex items-center gap-3 bg-gradient-to-r from-saffron-500 to-amber-600 text-white font-bold px-10 py-5 rounded-full shadow-[0_0_30px_rgba(255,153,51,0.4)] hover:shadow-[0_0_50px_rgba(255,153,51,0.6)] hover:scale-105 transition-all duration-300 tracking-wider uppercase text-sm">
+                <i data-lucide="list-tree" class="w-5 h-5"></i> Открыть Банк идей
             </a>
         </div>
+        
+        <!-- Glowing Orbs CTA Background -->
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-3xl aspect-square bg-saffron-500/10 rounded-full blur-[100px] pointer-events-none -z-0"></div>
     </section>
 
-    <!-- 7. FOOTER -->
-    <footer class="bg-slate-900 border-t border-white/10 py-8 px-6">
-        <div class="max-w-4xl mx-auto flex flex-col items-center justify-center space-y-4">
-            <a href="https://t.me/dmitriibagnin" target="_blank" rel="noopener noreferrer" class="group flex items-center justify-center text-center gap-3 text-slate-300 hover:text-white transition-colors duration-300">
-                <span class="text-sm tracking-[0.15em] font-light uppercase">Разработка премиальных ИИ-лендингов</span>
-                <i data-lucide="arrow-right" class="w-4 h-4 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"></i>
+    <!-- 6. FOOTER -->
+    <footer class="bg-[#050813] border-t border-white/10 py-12 px-6 relative z-10">
+        <div class="max-w-4xl mx-auto flex flex-col items-center justify-center space-y-8">
+            <a href="https://t.me/dmitriibagnin" target="_blank" rel="noopener noreferrer" class="group flex items-center justify-center text-center gap-3 text-saffron-500/70 hover:text-saffron-400 transition-colors duration-300">
+                <span class="text-sm tracking-[0.2em] font-light uppercase">Разработка премиальных ИИ-лендингов</span>
+                <i data-lucide="arrow-right" class="w-4 h-4 opacity-50 group-hover:opacity-100 group-hover:translate-x-2 transition-all duration-300"></i>
             </a>
-            <div class="flex flex-wrap items-center justify-center gap-4 text-xs font-mono text-slate-500 tracking-[0.15em]">
-                <span>ARCHITECTED BY DGD</span>
-                <span class="opacity-30 hidden sm:inline">|</span>
-                <span>ZERO ENTROPY</span>
-                <span class="opacity-30 hidden sm:inline">|</span>
-                <span>VEDIC FUTURISM</span>
+            <div class="flex flex-wrap items-center justify-center gap-6 text-xs font-mono text-slate-600 tracking-[0.25em]">
+                <span class="hover:text-slate-400 transition-colors">ARCHITECTED BY DGD</span>
+                <span class="opacity-30 hidden sm:inline text-saffron-500">|</span>
+                <span class="hover:text-slate-400 transition-colors">ZERO ENTROPY</span>
+                <span class="opacity-30 hidden sm:inline text-saffron-500">|</span>
+                <span class="hover:text-slate-400 transition-colors">VEDIC FUTURISM</span>
             </div>
         </div>
     </footer>
 
-    <!-- Скрипты -->
+    <!-- Скрипты для анимаций -->
     <script>
+        // Инициализация иконок
         lucide.createIcons();
+
+        // Parallax Effect
         document.addEventListener('DOMContentLoaded', () => {
             const heroBg = document.getElementById('hero-bg');
             if (heroBg) {
                 window.addEventListener('scroll', () => {
                     const scrollY = window.scrollY;
-                    heroBg.style.transform = \`translateY(\${scrollY * 0.5}px)\`;
+                    heroBg.style.transform = `translateY(${scrollY * 0.4}px) scale(${1 + scrollY * 0.0005})`;
                 });
+            }
+
+            // Scroll Reveal Animation (Intersection Observer)
+            const reveals = document.querySelectorAll('.reveal');
+            
+            const revealOptions = {
+                threshold: 0.15,
+                rootMargin: "0px 0px -50px 0px"
+            };
+
+            const revealOnScroll = new IntersectionObserver(function(entries, observer) {
+                entries.forEach(entry => {
+                    if (!entry.isIntersecting) {
+                        return;
+                    } else {
+                        entry.target.classList.add('active');
+                        // Опционально: отписаться после первого показа, чтобы анимация не повторялась при скролле вверх
+                        // observer.unobserve(entry.target); 
+                    }
+                });
+            }, revealOptions);
+
+            reveals.forEach(reveal => {
+                revealOnScroll.observe(reveal);
+            });
+
+            // Particles generation
+            const container = document.getElementById('particles-container');
+            const colors = ['rgba(255,153,51,0.6)', 'rgba(125,211,252,0.4)', 'rgba(255,223,0,0.5)'];
+            
+            for(let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle', 'animate-float-slow');
+                
+                // Randomize properties
+                const size = Math.random() * 8 + 2; // 2px to 10px
+                const left = Math.random() * 100; // 0% to 100%
+                const top = Math.random() * 100; // 0% to 100%
+                const delay = Math.random() * 5; // 0s to 5s
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.left = `${left}vw`;
+                particle.style.top = `${top}vh`;
+                particle.style.animationDelay = `${delay}s`;
+                particle.style.background = `radial-gradient(circle, ${color} 0%, rgba(0,0,0,0) 70%)`;
+                
+                container.appendChild(particle);
             }
         });
     </script>
