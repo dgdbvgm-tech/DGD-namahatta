@@ -445,9 +445,23 @@ const App = {
             ideas.forEach(idea => {
                 const voted = localStorage.getItem('voted_idea_' + idea.id) === 'true';
                 const currentVotes = idea.votes + (voted ? 1 : 0);
+                
+                let imageHtml = '';
+                if (idea.image) {
+                    imageHtml = `<div style="height: 160px; overflow: hidden; border-radius: 8px 8px 0 0; margin: -1.5rem -1.5rem 1rem -1.5rem;">
+                                    <img src="${idea.image}" alt="Preview" style="width: 100%; height: 100%; object-fit: cover; object-position: center;">
+                                 </div>`;
+                }
+
+                let actionsHtml = '';
+                if (idea.url) {
+                    actionsHtml = `<a href="${idea.url}" target="_blank" rel="noopener noreferrer" style="color: var(--primary-gold); font-weight: 600; text-decoration: none; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 0.3rem;">📖 Читать лонгрид</a>`;
+                }
+
                 html += `
-                    <div class="idea-card scroll-reveal" style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; display: flex; flex-direction: column; justify-content: space-between; gap: 1rem; backdrop-filter: blur(10px); box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: transform 0.3s ease;">
+                    <div class="idea-card scroll-reveal" style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; display: flex; flex-direction: column; justify-content: space-between; gap: 1rem; backdrop-filter: blur(10px); box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: transform 0.3s ease; height: 100%;">
                         <div class="idea-content">
+                            ${imageHtml}
                             <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--text-color); margin-bottom: 0.5rem; line-height: 1.4;">${idea.title}</h3>
                             <p style="font-size: 0.95rem; color: var(--text-color); opacity: 0.7; margin-bottom: 1rem; line-height: 1.5;">${idea.description}</p>
                             <div class="idea-meta" style="display: flex; flex-direction: column; gap: 0.5rem;">
@@ -457,7 +471,8 @@ const App = {
                                 </div>
                             </div>
                         </div>
-                        <div class="idea-vote" style="margin-top: 1rem; border-top: 1px solid var(--border-color); padding-top: 1rem; text-align: right;">
+                        <div class="idea-vote" style="margin-top: 1rem; border-top: 1px solid var(--border-color); padding-top: 1rem; display: flex; justify-content: ${idea.url ? 'space-between' : 'flex-end'}; align-items: center;">
+                            ${actionsHtml}
                             <button onclick="App.toggleVote('${idea.id}')" id="vote-btn-${idea.id}" style="background: ${voted ? 'var(--primary-gold)' : 'transparent'}; color: ${voted ? '#fff' : 'var(--text-color)'}; border: 1px solid ${voted ? 'var(--primary-gold)' : 'var(--border-color)'}; padding: 0.4rem 1rem; border-radius: 20px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 0.5rem;">
                                 ⬆️ <span id="vote-count-${idea.id}">${currentVotes}</span>
                             </button>
