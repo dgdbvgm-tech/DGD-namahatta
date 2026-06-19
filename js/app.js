@@ -71,6 +71,8 @@ const App = {
         } else if (hash.startsWith('#event/')) {
             const eventId = hash.replace('#event/', '');
             this.renderEventDetail(eventId);
+        } else if (hash === '#ideas') {
+            this.renderIdeas();
         } else {
             this.renderTimeline();
         }
@@ -412,6 +414,95 @@ const App = {
                     console.error('Failed to copy: ', err);
                 }
             });
+        }
+        }
+    },
+
+    async renderIdeas() {
+        this.container.innerHTML = '<div class="loader">Загрузка идей...</div>';
+        try {
+            const response = await fetch('data/ideas.json');
+            const ideas = await response.json();
+            
+            // Sort by votes (local + mock)
+            ideas.sort((a, b) => {
+                const aVotes = a.votes + (localStorage.getItem('voted_idea_' + a.id) === 'true' ? 1 : 0);
+                const bVotes = b.votes + (localStorage.getItem('voted_idea_' + b.id) === 'true' ? 1 : 0);
+                return bVotes - aVotes;
+            });
+
+            let html = `
+                <div class="ideas-header animate-fade-in" style="text-align: center; margin: 2rem 0; padding: 0 1rem;">
+                    <h1 class="page-title" style="font-size: 2.5rem; color: var(--primary-gold); margin-bottom: 1rem;">Банк идей 💡</h1>
+                    <p class="page-subtitle" style="color: var(--text-color); opacity: 0.8; max-width: 600px; margin: 0 auto; line-height: 1.6;">
+                        Темы для будущих Нама-хатт. Предлагайте свои идеи и голосуйте за те, что хотите обсудить.
+                    </p>
+                    <a href="https://t.me/dmitriibagnin" target="_blank" rel="noopener noreferrer" style="display: inline-block; margin-top: 1.5rem; padding: 0.6rem 1.5rem; background: var(--primary-gold); color: #fff; text-decoration: none; border-radius: 20px; font-weight: 600; box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3); transition: transform 0.3s ease;">+ Предложить тему</a>
+                </div>
+                
+                <div class="ideas-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; padding: 1rem;">
+            `;
+
+            ideas.forEach(idea => {
+                const voted = localStorage.getItem('voted_idea_' + idea.id) === 'true';
+                const currentVotes = idea.votes + (voted ? 1 : 0);
+                html += `
+                    <div class="idea-card scroll-reveal" style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; display: flex; flex-direction: column; justify-content: space-between; gap: 1rem; backdrop-filter: blur(10px); box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: transform 0.3s ease;">
+                        <div class="idea-content">
+                            <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--text-color); margin-bottom: 0.5rem; line-height: 1.4;">${idea.title}</h3>
+                            <p style="font-size: 0.95rem; color: var(--text-color); opacity: 0.7; margin-bottom: 1rem; line-height: 1.5;">${idea.description}</p>
+                            <div class="idea-meta" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                                <span style="font-size: 0.85rem; font-weight: 600; color: var(--primary-gold);">✍️ ${idea.author}</span>
+                                <div class="idea-tags" style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                                    ${idea.tags.map(tag => `<span style="font-size: 0.75rem; background: rgba(212, 175, 55, 0.1); color: var(--primary-gold); padding: 0.2rem 0.6rem; border-radius: 10px;">#${tag}</span>`).join('')}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="idea-vote" style="margin-top: 1rem; border-top: 1px solid var(--border-color); padding-top: 1rem; text-align: right;">
+                            <button onclick="App.toggleVote('${idea.id}')" id="vote-btn-${idea.id}" style="background: ${voted ? 'var(--primary-gold)' : 'transparent'}; color: ${voted ? '#fff' : 'var(--text-color)'}; border: 1px solid ${voted ? 'var(--primary-gold)' : 'var(--border-color)'}; padding: 0.4rem 1rem; border-radius: 20px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 0.5rem;">
+                                ⬆️ <span id="vote-count-${idea.id}">${currentVotes}</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `</div>`;
+            this.container.innerHTML = html;
+            setTimeout(() => this.initScrollAnimations(), 100);
+
+        } catch (e) {
+            console.error("Failed to load ideas", e);
+            this.container.innerHTML = '<div class="loader">Ошибка загрузки идей.</div>';
+        }
+    },
+
+    toggleVote(id) {
+        const btn = document.getElementById('vote-btn-' + id);
+        const countSpan = document.getElementById('vote-count-' + id);
+        let count = parseInt(countSpan.textContent);
+        
+        const votedKey = 'voted_idea_' + id;
+        const hasVoted = localStorage.getItem(votedKey) === 'true';
+
+        if (hasVoted) {
+            localStorage.setItem(votedKey, 'false');
+            countSpan.textContent = count - 1;
+            btn.style.background = 'transparent';
+            btn.style.color = 'var(--text-color)';
+            btn.style.border = '1px solid var(--border-color)';
+        } else {
+            localStorage.setItem(votedKey, 'true');
+            countSpan.textContent = count + 1;
+            btn.style.background = 'var(--primary-gold)';
+            btn.style.color = '#fff';
+            btn.style.border = '1px solid var(--primary-gold)';
+            
+            // Show toast
+            const toast = document.getElementById('toast');
+            toast.textContent = 'Голос учтен! ✨';
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
         }
     }
 };
