@@ -415,7 +415,6 @@ const App = {
                 }
             });
         }
-        }
     },
 
     async renderIdeas() {
