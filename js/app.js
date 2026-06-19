@@ -1,18 +1,24 @@
 const App = {
     data: [],
+    ideasData: [],
     container: null,
+    userDoc: null,
+    currentUser: null,
 
     async init() {
         this.container = document.getElementById('app-content');
         this.initTheme();
         
         try {
-            const [eventsRes, ideasRes] = await Promise.all([
-                fetch('data/events.json'),
-                fetch('data/ideas.json')
-            ]);
+            await this.initAuth();
+            
+            const eventsRes = await fetch('data/events.json');
             this.data = await eventsRes.json();
-            this.ideasData = await ideasRes.json();
+            
+            if (window.fbDb) {
+                const snapshot = await window.fbDb.collection('Ideas').get();
+                this.ideasData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            }
             
             // Update nav link badge
             const ideasNav = document.getElementById('nav-ideas-link');
@@ -20,13 +26,51 @@ const App = {
                 ideasNav.innerHTML = `💡 Банк идей <span class="badge">${this.ideasData.length}</span>`;
             }
         } catch (e) {
-            console.error("Failed to load data", e);
-            this.container.innerHTML = '<div class="loader">Ошибка загрузки данных.</div>';
+            console.error("Failed to init data or firebase", e);
+            this.container.innerHTML = '<div class="loader">Ошибка инициализации. Проверьте подключение к Firebase.</div>';
             return;
         }
 
         this.initRouter();
         this.initSevaModal();
+    },
+
+    initAuth() {
+        return new Promise((resolve, reject) => {
+            if (!window.fbAuth) return resolve(null);
+            
+            window.fbAuth.onAuthStateChanged(async (user) => {
+                if (user) {
+                    this.currentUser = user;
+                    await this.loadUserDoc(user.uid);
+                    resolve(user);
+                } else {
+                    try {
+                        await window.fbAuth.signInAnonymously();
+                    } catch (err) {
+                        console.error("Auth error:", err);
+                        reject(err);
+                    }
+                }
+            });
+        });
+    },
+
+    async loadUserDoc(uid) {
+        if (!window.fbDb) return;
+        const userRef = window.fbDb.collection('Users').doc(uid);
+        const docSnap = await userRef.get();
+        if (docSnap.exists) {
+            this.userDoc = docSnap.data();
+        } else {
+            const newUser = {
+                votesLeft: 3,
+                votedIdeaIds: [],
+                isAdmin: false
+            };
+            await userRef.set(newUser);
+            this.userDoc = newUser;
+        }
     },
 
     initTheme() {
@@ -337,8 +381,8 @@ const App = {
             if (event.dynamicTopIdea && this.ideasData && this.ideasData.length > 0) {
                 // Sort by votes
                 const sortedIdeas = [...this.ideasData].sort((a, b) => {
-                    const aVotes = a.votes + (localStorage.getItem('voted_idea_' + a.id) === 'true' ? 1 : 0);
-                    const bVotes = b.votes + (localStorage.getItem('voted_idea_' + b.id) === 'true' ? 1 : 0);
+                    const aVotes = a.voteCount || 0;
+                    const bVotes = b.voteCount || 0;
                     return bVotes - aVotes;
                 });
                 const topIdea = sortedIdeas[0];
@@ -451,31 +495,36 @@ const App = {
     async renderIdeas() {
         this.container.innerHTML = '<div class="loader">Загрузка идей...</div>';
         try {
-            const response = await fetch('data/ideas.json');
-            const ideas = await response.json();
+            if (!window.fbDb) throw new Error("Firebase DB not initialized");
+            const snapshot = await window.fbDb.collection('Ideas').get();
+            let ideas = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            this.ideasData = ideas; // update local cache
             
-            // Sort by votes (local + mock)
-            ideas.sort((a, b) => {
-                const aVotes = a.votes + (localStorage.getItem('voted_idea_' + a.id) === 'true' ? 1 : 0);
-                const bVotes = b.votes + (localStorage.getItem('voted_idea_' + b.id) === 'true' ? 1 : 0);
-                return bVotes - aVotes;
-            });
+            // Filter by status if not admin
+            if (!this.userDoc.isAdmin) {
+                ideas = ideas.filter(idea => idea.status === 'Voting' || idea.status === 'Selected');
+            }
+
+            // Sort by votes
+            ideas.sort((a, b) => (b.voteCount || 0) - (a.voteCount || 0));
 
             let html = `
                 <div class="ideas-header animate-fade-in" style="text-align: center; margin: 2rem 0; padding: 0 1rem;">
                     <h1 class="page-title" style="font-size: 2.5rem; color: var(--primary-gold); margin-bottom: 1rem;">Банк идей 💡</h1>
                     <p class="page-subtitle" style="color: var(--text-color); opacity: 0.8; max-width: 600px; margin: 0 auto; line-height: 1.6;">
-                        Темы для будущих Нама-хатт. Предлагайте свои идеи и голосуйте за те, что хотите обсудить.
+                        Темы для будущих Нама-хатт. У вас осталось голосов: <strong>${this.userDoc.votesLeft} из 3</strong>
                     </p>
-                    <a href="https://t.me/dmitriibagnin" target="_blank" rel="noopener noreferrer" style="display: inline-block; margin-top: 1.5rem; padding: 0.6rem 1.5rem; background: var(--primary-gold); color: #fff; text-decoration: none; border-radius: 20px; font-weight: 600; box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3); transition: transform 0.3s ease;">+ Предложить тему</a>
+                    ${this.userDoc.isAdmin ? `<button onclick="App.addIdeaPrompt()" style="margin-top: 1.5rem; padding: 0.6rem 1.5rem; background: var(--primary-gold); color: #fff; border:none; border-radius: 20px; font-weight: 600; cursor: pointer; box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3); transition: transform 0.3s ease;">+ Добавить идею (Админ)</button>` : ''}
                 </div>
                 
                 <div class="ideas-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; padding: 1rem;">
             `;
 
+            const hasVotedAny = this.userDoc.votedIdeaIds && this.userDoc.votedIdeaIds.length > 0;
+
             ideas.forEach(idea => {
-                const voted = localStorage.getItem('voted_idea_' + idea.id) === 'true';
-                const currentVotes = idea.votes + (voted ? 1 : 0);
+                const voted = this.userDoc.votedIdeaIds && this.userDoc.votedIdeaIds.includes(idea.id);
+                const displayVotes = (hasVotedAny || this.userDoc.isAdmin) ? (idea.voteCount || 0) : '👁️‍🗨️';
                 
                 let imageHtml = '';
                 if (idea.image) {
@@ -490,6 +539,19 @@ const App = {
                 if (idea.url) {
                     actionsHtml = `<a href="${idea.url}" target="_blank" rel="noopener noreferrer" style="color: var(--primary-gold); font-weight: 600; text-decoration: none; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 0.3rem;">📖 Читать лонгрид</a>`;
                 }
+                
+                let tagsHtml = '';
+                if (idea.tags && idea.tags.length > 0) {
+                    tagsHtml = idea.tags.map(tag => `<span style="font-size: 0.75rem; background: rgba(212, 175, 55, 0.1); color: var(--primary-gold); padding: 0.2rem 0.6rem; border-radius: 10px;">#${tag}</span>`).join('');
+                }
+
+                let adminActions = '';
+                if (this.userDoc.isAdmin) {
+                    adminActions = `<div style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--text-color); opacity: 0.6; display:flex; justify-content: space-between; align-items: center;">
+                        <span>Статус: <strong>${idea.status || 'New'}</strong></span>
+                        <button onclick="App.changeIdeaStatus('${idea.id}')" style="background:transparent; border: 1px solid var(--border-color); color:var(--text-color); border-radius: 8px; cursor: pointer;">Изменить</button>
+                    </div>`;
+                }
 
                 html += `
                     <div class="idea-card scroll-reveal" style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; display: flex; flex-direction: column; justify-content: space-between; gap: 1rem; backdrop-filter: blur(10px); box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: transform 0.3s ease; height: 100%;">
@@ -498,16 +560,17 @@ const App = {
                             <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--text-color); margin-bottom: 0.5rem; line-height: 1.4;">${idea.title}</h3>
                             <p style="font-size: 0.95rem; color: var(--text-color); opacity: 0.7; margin-bottom: 1rem; line-height: 1.5;">${idea.description}</p>
                             <div class="idea-meta" style="display: flex; flex-direction: column; gap: 0.5rem;">
-                                <span style="font-size: 0.85rem; font-weight: 600; color: var(--primary-gold);">✍️ ${idea.author}</span>
+                                ${idea.author ? `<span style="font-size: 0.85rem; font-weight: 600; color: var(--primary-gold);">✍️ ${idea.author}</span>` : ''}
                                 <div class="idea-tags" style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-                                    ${idea.tags.map(tag => `<span style="font-size: 0.75rem; background: rgba(212, 175, 55, 0.1); color: var(--primary-gold); padding: 0.2rem 0.6rem; border-radius: 10px;">#${tag}</span>`).join('')}
+                                    ${tagsHtml}
                                 </div>
                             </div>
+                            ${adminActions}
                         </div>
                         <div class="idea-vote" style="margin-top: 1rem; border-top: 1px solid var(--border-color); padding-top: 1rem; display: flex; justify-content: ${idea.url ? 'space-between' : 'flex-end'}; align-items: center;">
                             ${actionsHtml}
-                            <button onclick="App.toggleVote('${idea.id}')" id="vote-btn-${idea.id}" style="background: ${voted ? 'var(--primary-gold)' : 'transparent'}; color: ${voted ? '#fff' : 'var(--text-color)'}; border: 1px solid ${voted ? 'var(--primary-gold)' : 'var(--border-color)'}; padding: 0.4rem 1rem; border-radius: 20px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 0.5rem;">
-                                ⬆️ <span id="vote-count-${idea.id}">${currentVotes}</span>
+                            <button onclick="App.toggleVote('${idea.id}')" id="vote-btn-${idea.id}" style="background: ${voted ? 'var(--primary-gold)' : 'transparent'}; color: ${voted ? '#fff' : 'var(--text-color)'}; border: 1px solid ${voted ? 'var(--primary-gold)' : 'var(--border-color)'}; padding: 0.4rem 1rem; border-radius: 20px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 0.5rem;" ${!voted && this.userDoc.votesLeft <= 0 ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
+                                ${voted ? 'Снять голос' : 'Голосовать'} ⬆️ <span id="vote-count-${idea.id}">${displayVotes}</span>
                             </button>
                         </div>
                     </div>
@@ -524,32 +587,105 @@ const App = {
         }
     },
 
-    toggleVote(id) {
+    async toggleVote(id) {
+        if (!this.currentUser) return;
         const btn = document.getElementById('vote-btn-' + id);
-        const countSpan = document.getElementById('vote-count-' + id);
-        let count = parseInt(countSpan.textContent);
         
-        const votedKey = 'voted_idea_' + id;
-        const hasVoted = localStorage.getItem(votedKey) === 'true';
+        const userRef = window.fbDb.collection('Users').doc(this.currentUser.uid);
+        const ideaRef = window.fbDb.collection('Ideas').doc(id);
 
-        if (hasVoted) {
-            localStorage.setItem(votedKey, 'false');
-            countSpan.textContent = count - 1;
-            btn.style.background = 'transparent';
-            btn.style.color = 'var(--text-color)';
-            btn.style.border = '1px solid var(--border-color)';
-        } else {
-            localStorage.setItem(votedKey, 'true');
-            countSpan.textContent = count + 1;
-            btn.style.background = 'var(--primary-gold)';
-            btn.style.color = '#fff';
-            btn.style.border = '1px solid var(--primary-gold)';
+        try {
+            btn.style.opacity = '0.5';
+            btn.style.pointerEvents = 'none';
+
+            await window.fbDb.runTransaction(async (transaction) => {
+                const userDoc = await transaction.get(userRef);
+                const ideaDoc = await transaction.get(ideaRef);
+                
+                if (!userDoc.exists || !ideaDoc.exists) throw "Document not found";
+                
+                const userData = userDoc.data();
+                const ideaData = ideaDoc.data();
+                
+                const votedIdeaIds = userData.votedIdeaIds || [];
+                const hasVoted = votedIdeaIds.includes(id);
+                
+                if (hasVoted) {
+                    transaction.update(userRef, {
+                        votedIdeaIds: firebase.firestore.FieldValue.arrayRemove(id),
+                        votesLeft: firebase.firestore.FieldValue.increment(1)
+                    });
+                    transaction.update(ideaRef, {
+                        voteCount: firebase.firestore.FieldValue.increment(-1)
+                    });
+                    this.userDoc.votedIdeaIds = votedIdeaIds.filter(v => v !== id);
+                    this.userDoc.votesLeft = userData.votesLeft + 1;
+                } else {
+                    if (userData.votesLeft <= 0) {
+                        throw "No votes left";
+                    }
+                    transaction.update(userRef, {
+                        votedIdeaIds: firebase.firestore.FieldValue.arrayUnion(id),
+                        votesLeft: firebase.firestore.FieldValue.increment(-1)
+                    });
+                    transaction.update(ideaRef, {
+                        voteCount: firebase.firestore.FieldValue.increment(1)
+                    });
+                    this.userDoc.votedIdeaIds = [...votedIdeaIds, id];
+                    this.userDoc.votesLeft = userData.votesLeft - 1;
+                }
+            });
             
-            // Show toast
+            // Re-render ideas to reflect new state immediately
+            this.renderIdeas();
+            
             const toast = document.getElementById('toast');
             toast.textContent = 'Голос учтен! ✨';
             toast.classList.add('show');
             setTimeout(() => toast.classList.remove('show'), 3000);
+
+        } catch (err) {
+            console.error("Voting failed", err);
+            alert(err === "No votes left" ? "У вас не осталось голосов!" : "Ошибка при голосовании");
+        } finally {
+            if(btn) {
+                btn.style.opacity = '1';
+                btn.style.pointerEvents = 'auto';
+            }
+        }
+    },
+
+    async addIdeaPrompt() {
+        const title = prompt("Название идеи:");
+        if (!title) return;
+        const description = prompt("Описание идеи:");
+        if (!description) return;
+        
+        try {
+            await window.fbDb.collection('Ideas').add({
+                title,
+                description,
+                status: 'Voting',
+                voteCount: 0,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            alert("Идея добавлена!");
+            this.renderIdeas();
+        } catch (e) {
+            console.error(e);
+            alert("Ошибка добавления");
+        }
+    },
+
+    async changeIdeaStatus(id) {
+        const newStatus = prompt("Новый статус (New, Grooming, Voting, Selected, Discussed):");
+        if (!newStatus) return;
+        try {
+            await window.fbDb.collection('Ideas').doc(id).update({ status: newStatus });
+            this.renderIdeas();
+        } catch (e) {
+            console.error(e);
+            alert("Ошибка обновления статуса");
         }
     }
 };
