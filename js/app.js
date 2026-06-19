@@ -26,6 +26,32 @@ const App = {
             if (window.fbDb && this.currentUser) {
                 const snapshot = await window.fbDb.collection('Ideas').get();
                 this.ideasData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                
+                // Авто-сидинг (заливка) из локального JSON, если база пустая
+                if (this.ideasData.length === 0) {
+                    try {
+                        const localRes = await fetch('data/ideas.json');
+                        const localIdeas = await localRes.json();
+                        for (const idea of localIdeas) {
+                            await window.fbDb.collection('Ideas').doc(idea.id).set({
+                                title: idea.title,
+                                description: idea.description,
+                                author: idea.author,
+                                status: 'Voting',
+                                voteCount: idea.votes || 0,
+                                tags: idea.tags || [],
+                                image: idea.image || null,
+                                url: idea.url || null,
+                                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                            });
+                        }
+                        // Перезагружаем список из базы после сидинга
+                        const newSnapshot = await window.fbDb.collection('Ideas').get();
+                        this.ideasData = newSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    } catch (seedErr) {
+                        console.error("Failed to seed ideas:", seedErr);
+                    }
+                }
             }
         } catch (e) {
             console.error("Firebase Init Error (Rules or Auth):", e);
