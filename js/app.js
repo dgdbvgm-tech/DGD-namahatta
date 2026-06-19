@@ -9,26 +9,34 @@ const App = {
         this.container = document.getElementById('app-content');
         this.initTheme();
         
+        // 1. Сначала загружаем основную базу событий (чтобы сайт не падал целиком)
+        try {
+            const eventsRes = await fetch('data/events.json');
+            this.data = await eventsRes.json();
+        } catch (e) {
+            console.error("Failed to load events.json", e);
+            this.container.innerHTML = '<div class="loader">Критическая ошибка: не удалось загрузить данные капсулы.</div>';
+            return;
+        }
+
+        // 2. Инициализируем Firebase (если упадет - логируем и отключаем фичу)
         try {
             await this.initAuth();
             
-            const eventsRes = await fetch('data/events.json');
-            this.data = await eventsRes.json();
-            
-            if (window.fbDb) {
+            if (window.fbDb && this.currentUser) {
                 const snapshot = await window.fbDb.collection('Ideas').get();
                 this.ideasData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             }
-            
-            // Update nav link badge
-            const ideasNav = document.getElementById('nav-ideas-link');
-            if (ideasNav && this.ideasData) {
-                ideasNav.innerHTML = `💡 Банк идей <span class="badge">${this.ideasData.length}</span>`;
-            }
         } catch (e) {
-            console.error("Failed to init data or firebase", e);
-            this.container.innerHTML = '<div class="loader">Ошибка инициализации. Проверьте подключение к Firebase.</div>';
-            return;
+            console.error("Firebase Init Error (Rules or Auth):", e);
+            // Если Firebase не работает, оставляем пустой массив, чтобы сайт загрузился
+            this.ideasData = [];
+        }
+        
+        // Update nav link badge
+        const ideasNav = document.getElementById('nav-ideas-link');
+        if (ideasNav && this.ideasData) {
+            ideasNav.innerHTML = `💡 Банк идей <span class="badge">${this.ideasData.length}</span>`;
         }
 
         this.initRouter();
@@ -42,13 +50,18 @@ const App = {
             window.fbAuth.onAuthStateChanged(async (user) => {
                 if (user) {
                     this.currentUser = user;
-                    await this.loadUserDoc(user.uid);
-                    resolve(user);
+                    try {
+                        await this.loadUserDoc(user.uid);
+                        resolve(user);
+                    } catch (e) {
+                        console.error("Failed to load user doc (check Firestore rules):", e);
+                        reject(e);
+                    }
                 } else {
                     try {
                         await window.fbAuth.signInAnonymously();
                     } catch (err) {
-                        console.error("Auth error:", err);
+                        console.error("Auth error (is Anonymous Auth enabled?):", err);
                         reject(err);
                     }
                 }
